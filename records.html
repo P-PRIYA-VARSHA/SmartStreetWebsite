@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - LED Status</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            background-color: #38323a;
+            padding: 10px 20px;
+            color: white;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            padding: 20px;
+            background-color: rgba(236, 240, 241, 0.3);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            color: #34495e;
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        #data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        #data-table th, #data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        #data-table th {
+            background-color: #f2f2f2;
+        }
+
+        .download-button, .delete-button {
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .download-button:hover, .delete-button:hover {
+            background-color: #218838;
+        }
+
+        .filter-input {
+            margin: 20px 0;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .led-counts {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .led-count {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>Admin Panel</h2>
+        <nav>
+            <a href="admindashboard.html">DASHBOARD</a>
+            <a href="adminnotification.html">NOTIFICATION</a>
+            <a href="record.html">RECORDS</a>
+            <a href="#">Settings</a>
+            <a href="homepage.html">HOME</a>
+            <a href="userdashboard.html">DASH BOARD</a>
+            <a href="admin.html">ADMIN</a>
+            <a href="lineman.html">LINEMAN</a>
+            <a href="contactus.html">CONTACT US</a>
+        </nav>
+    </div>
+
+    <main class="content">
+        <div class="container">
+            <h1>LED Status and Sensor Readings</h1>
+
+            <div class="led-counts">
+                <div class="led-count" id="led1-count">LED1: 0</div>
+                <div class="led-count" id="led2-count">LED2: 0</div>
+                <div class="led-count" id="led3-count">LED3: 0</div>
+                <div class="led-count" id="led4-count">LED4: 0</div>
+                <div class="led-count" id="led5-count">LED5: 0</div>
+                <div class="led-count" id="led6-count">LED6: 0</div>
+            </div>
+
+            <input type="text" class="filter-input" id="filter-input" placeholder="Filter data..." />
+
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>LED1</th>
+                        <th>LED2</th>
+                        <th>LED3</th>
+                        <th>LED4</th>
+                        <th>LED5</th>
+                        <th>LED6</th>
+                        <th>LDR1</th>
+                        <th>LDR2</th>
+                        <th>LDR3</th>
+                        <th>IR1</th>
+                        <th>IR2</th>
+                        <th>Rain Detection</th>
+                        <th>Select</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body"></tbody>
+            </table>
+
+            <button class="download-button" id="download-button">Download Data</button>
+            <button class="delete-button" id="delete-button">Delete Selected Rows</button>
+        </div>
+    </main>
+
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBWxLRFas0jtZi2tdWrM0qjIkZhJh2fN8",
+            authDomain: "happyiot.firebaseapp.com",
+            databaseURL: "https://happyiot.firebaseio.com",
+            projectId: "happyiot",
+            storageBucket: "happyiot.appspot.com",
+            messagingSenderId: "900187970996",
+            appId: "1:900187970996:web:2a3a5428c37884b1d3a6e1",
+            measurementId: "G-F611G98B2Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // References to LED, LDR, IR sensor, and Rain Detection data
+        const ledRefs = [
+            ref(database, 'LED1'),
+            ref(database, 'LED2'),
+            ref(database, 'LED3'),
+            ref(database, 'LED4'),
+            ref(database, 'LED5'),
+            ref(database, 'LED6')
+        ];
+        const ldrRefs = [
+            ref(database, 'ldr1Value0'),
+            ref(database, 'ldr1Value1'),
+            ref(database, 'ldr1Value2')
+        ];
+        const irRefs = [
+            ref(database, 'irSensor1'),
+            ref(database, 'irSensor2')
+        ];
+        const rainRef = ref(database, 'rainDetected');
+
+        const dataTableBody = document.getElementById('data-table-body');
+        const filterInput = document.getElementById('filter-input');
+
+        // LED on counts
+        const ledCounts = [0, 0, 0, 0, 0, 0]; // Array to store ON counts for each LED
+
+        // Function to add a new row to the data table
+        function addDataRow(date, time, ledStatuses, ldrValues, irStatuses, rainStatus) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${date}</td>
+                <td>${time}</td>
+                <td>${ledStatuses[0]}</td>
+                <td>${ledStatuses[1]}</td>
+                <td>${ledStatuses[2]}</td>
+                <td>${ledStatuses[3]}</td>
+                <td>${ledStatuses[4]}</td>
+                <td>${ledStatuses[5]}</td>
+                <td>${ldrValues[0]}</td>
+                <td>${ldrValues[1]}</td>
+                <td>${ldrValues[2]}</td>
+                <td>${irStatuses[0]}</td>
+                <td>${irStatuses[1]}</td>
+                <td>${rainStatus}</td>
+                <td><input type="checkbox" class="row-selector"></td>
+            `;
+            dataTableBody.appendChild(row);
+        }
+
+        // Function to fetch and display the latest data
+        function fetchAndDisplayData() {
+            const currentDate = new Date();
+            const formattedDate = currentDate.toLocaleDateString();
+            const formattedTime = currentDate.toLocaleTimeString();
+
+            Promise.all(ledRefs.map((ledRef, index) => {
+                return new Promise((resolve) => {
+                    onValue(ledRef, (snapshot) => {
+                        const status = snapshot.val();
+                        const ledStatus = status === 'on' ? 'ON' : 'OFF';
+
+                        // Increment the count if the LED is ON
+                        if (status === 'on') {
+                            ledCounts[index]++;
+                        }
+
+                        // Update LED count display
+                        document.getElementById(`led${index + 1}-count`).innerText = `LED${index + 1}: ${ledCounts[index]}`;
+                        resolve(ledStatus);
+                    });
+                });
+            })).then((ledStatuses) => {
+                Promise.all(ldrRefs.map((ldrRef) => {
+                    return new Promise((resolve) => {
+                        onValue(ldrRef, (snapshot) => {
+                            resolve(snapshot.val());
+                        });
+                    });
+                })).then((ldrValues) => {
+                    Promise.all(irRefs.map((irRef) => {
+                        return new Promise((resolve) => {
+                            onValue(irRef, (snapshot) => {
+                                resolve(snapshot.val());
+                            });
+                        });
+                    })).then((irStatuses) => {
+                        onValue(rainRef, (snapshot) => {
+                            const rainStatus = snapshot.val() ? 'Detected' : 'Not Detected';
+                            addDataRow(formattedDate, formattedTime, ledStatuses, ldrValues, irStatuses, rainStatus);
+                            saveDataToLocalStorage(formattedDate, formattedTime, ledStatuses, ldrValues, irStatuses, rainStatus);
+                        });
+                    });
+                });
+            });
+        }
+
+        // Function to save data to local storage
+        function saveDataToLocalStorage(date, time, ledStatuses, ldrValues, irStatuses, rainStatus) {
+            let storedData = JSON.parse(localStorage.getItem('sensorData')) || [];
+            storedData.push({ date, time, ledStatuses, ldrValues, irStatuses, rainStatus });
+            localStorage.setItem('sensorData', JSON.stringify(storedData));
+        }
+
+        // Load data from local storage and populate the table
+        function loadDataFromLocalStorage() {
+            const storedData = JSON.parse(localStorage.getItem('sensorData')) || [];
+            storedData.forEach(({ date, time, ledStatuses, ldrValues, irStatuses, rainStatus }) => {
+                addDataRow(date, time, ledStatuses, ldrValues, irStatuses, rainStatus);
+            });
+        }
+
+         // Function to download data as CSV
+         function downloadData() {
+            const rows = Array.from(dataTableBody.rows);
+            const csvContent = rows.map(row => {
+                const cells = Array.from(row.cells).map(cell => cell.innerText).join(',');
+                return cells;
+            }).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'sensor_data.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Function to delete selected rows
+        function deleteSelectedRows() {
+            const rows = Array.from(dataTableBody.rows);
+            rows.forEach(row => {
+                const checkbox = row.querySelector('.row-selector');
+                if (checkbox && checkbox.checked) {
+                    dataTableBody.removeChild(row);
+                }
+            });
+        }
+
+        // Set an interval to fetch and display data every 1 minute
+        setInterval(fetchAndDisplayData, 6000); // Fetch data every minute (60000 ms)
+
+        // Load data when the page is loaded
+        window.onload = () => {
+            document.getElementById('download-button').addEventListener('click', downloadData);
+            document.getElementById('delete-button').addEventListener('click', deleteSelectedRows);
+        };
+    </script>
+</body>
+</html>

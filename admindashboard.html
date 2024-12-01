@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Data Gauge - LDR Sensors</title>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the necessary Firebase SDK modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBWxLRFas0jtZi2tdWrM0qjIkZhJh2fN8",
+            authDomain: "happyiot.firebaseapp.com",
+            databaseURL: "https://happyiot.firebaseio.com",
+            projectId: "happyiot",
+            storageBucket: "happyiot.appspot.com",
+            messagingSenderId: "900187970996",
+            appId: "1:900187970996:web:2a3a5428c37884b1d3a6e1",
+            measurementId: "G-F611G98B2Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Function to fetch LDR, IR sensor, current sensor, and rain sensor data from Firebase
+        function fetchSensorData() {
+            console.log("Attempting to fetch sensor data from Firebase...");
+
+            const dataRef = ref(database); // Make sure this path is correct
+
+            // Listening for real-time updates
+            onValue(dataRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    console.log("Sensor data retrieved from Firebase:", data); // Log the data received
+
+                    // Update each LDR gauge with corresponding values
+                    updateGauge(gauge1, parseFloat(data.ldr1Value0));
+                    updateGauge(gauge2, parseFloat(data.ldr1Value1));
+                    updateGauge(gauge3, parseFloat(data.ldr1Value2));
+                    updateGauge(gauge4, parseFloat(data.ldr2Value0));
+                    updateGauge(gauge5, parseFloat(data.ldr2Value1));
+                    updateGauge(gauge6, parseFloat(data.ldr2Value2));
+
+                    // Update IR sensor, current sensor, and rain detector sensor
+                    updateGauge(gauge7, parseFloat(data.irSensor1));   // IR Sensor 1
+                    updateGauge(gauge8, parseFloat(data.irSensor2));   // IR Sensor 2
+                    updateGauge(gauge9, parseFloat(data.faultCurrentSensor)); // Current Sensor
+                    updateGauge(gauge10, parseFloat(data.rainDetected));   // Rain Detector Sensor
+                } else {
+                    console.error("Sensor data not found in Firebase structure.");
+                }
+            }, (error) => {
+                console.error("Error retrieving data from Firebase:", error);
+            });
+        }
+
+        // Fetch sensor data when the page loads
+        window.addEventListener('load', fetchSensorData);
+    </script>
+
+    <!-- Load Raphael before JustGage -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.4.0/justgage.min.js"></script>
+
+    <!-- CSS for layout and smooth scroll -->
+    <style>
+        /* General body styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            color: #333;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('street.jpg') no-repeat center center fixed;
+            background-size: cover;
+            filter: brightness(80%);
+            z-index: -1;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #38323a;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #2c3e50;
+        }
+
+        .content {
+            margin-left: 270px; /* Adjust margin to make room for the sidebar */
+            padding: 20px;
+            background-color: rgba(236, 240, 241, 0.3);
+            overflow-y: auto;
+        }
+
+        h1, h2 {
+            margin: 20px 0;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #34495e;
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .gauge-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            width: 100%;
+            filter: brightness(50%);
+            max-width: 1000px;
+            
+        }
+
+        .gauge-container {
+            width: 250px;
+            height: 160px;
+            margin: 10px;
+            text-align: center;
+           
+              display: flex;
+             flex-direction: column; /* Stack gauge and label vertically */
+             align-items: center; /* Center align items */
+    
+    height: auto; /* Allow height to adjust based on content */
+  
+
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            background-color: #fff;
+            width: 100%;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 2px -2px gray;
+            z-index: 1000;
+        }
+
+        nav a {
+            padding: 10px 20px;
+            text-decoration: none;
+            color: black;
+            font-size: 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: grey;
+            color: #fff;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 -2px 2px -2px gray;
+            text-align: center;
+            width: 100%;
+        }
+
+        .sensor-wrapper {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .gauge-label {
+    margin-top: 5px;  /* Adjust space above the label */
+    font-size: 1em;
+    color: #34495e;
+    text-align: center;  /* Center the label */
+}
+
+    </style>
+
+</head>
+
+<body>
+    <!-- Navigation bar with smooth scroll links -->
+    <nav>
+        <a href="#ldr-sensors">LDR Sensor Data</a>
+        <a href="#ir-sensors">IR Sensor Data</a>
+        <a href="#current-sensor">Current Sensor Data</a>
+        <a href="#rain-sensor">Rain Sensor Data</a>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="admindashboard.html">ADMIN DASHBOARD</a>
+        <a href="adminnotification.html">NOTIFICATION</a>
+        <a href="records.html">RECORDS</a>
+        <a href="homepage.html">HOME</a>
+        <a href="userdashboard.html">DASHBOARD</a>
+        <a href="admin.html">ADMIN</a>
+        <a href="lineman.html">LINEMAN</a>
+        <a href="contactus.html">CONTACT US</a>
+    </div>
+
+    <!-- Main content area -->
+    <div class="content">
+        <h1>Welcome to the Data Gauge System</h1>
+
+        <!-- LDR Sensor Data Wrapper -->
+        <!-- LDR Sensor Data Wrapper -->
+<!-- LDR Sensor Data Wrapper -->
+<div class="sensor-wrapper" id="ldr-sensors">
+    <h2>LDR Sensor Gauges</h2>
+    <div class="gauge-row">
+        <div class="gauge-container">
+            <div id="gauge1"></div>
+            <div class="gauge-label">LDR Sensor 1</div>
+        </div>
+        <div class="gauge-container">
+            <div id="gauge2"></div>
+            <div class="gauge-label">LDR Sensor 2</div>
+        </div>
+        <div class="gauge-container">
+            <div id="gauge3"></div>
+            <div class="gauge-label">LDR Sensor 3</div>
+        </div>
+    </div>
+    <div class="gauge-row">
+        <div class="gauge-container">
+            <div id="gauge4"></div>
+            <div class="gauge-label">LDR Sensor 4</div>
+        </div>
+        <div class="gauge-container">
+            <div id="gauge5"></div>
+            <div class="gauge-label">LDR Sensor 5</div>
+        </div>
+        <div class="gauge-container">
+            <div id="gauge6"></div>
+            <div class="gauge-label">LDR Sensor 6</div>
+        </div>
+    </div>
+</div>
+
+<!-- IR Sensor Data Wrapper -->
+<div class="sensor-wrapper" id="ir-sensors">
+    <h2>IR Sensor Gauges</h2>
+    <div class="gauge-row">
+        <div class="gauge-container">
+            <div id="gauge7"></div>
+            <div class="gauge-label">IR Sensor 1</div>
+        </div>
+        <div class="gauge-container">
+            <div id="gauge8"></div>
+            <div class="gauge-label">IR Sensor 2</div>
+        </div>
+    </div>
+</div>
+
+<!-- Current Sensor Data Wrapper -->
+<div class="sensor-wrapper" id="current-sensor">
+    <h2>Current Sensor Gauge</h2>
+    <div class="gauge-row">
+        <div class="gauge-container">
+            <div id="gauge9"></div>
+            <div class="gauge-label">Current Sensor</div>
+        </div>
+    </div>
+</div>
+
+<!-- Rain Sensor Data Wrapper -->
+<div class="sensor-wrapper" id="rain-sensor">
+    <h2>Rain Detector Gauge</h2>
+    <div class="gauge-row">
+        <div class="gauge-container">
+            <div id="gauge10"></div>
+            <div class="gauge-label">Rain Detector Sensor</div>
+        </div>
+    </div>
+</div>
+
+
+
+    <!-- JustGage initialization -->
+    <script>
+        // Initialize the gauges for the LDR sensors
+        var gauge1 = new JustGage({
+            id: "gauge1",
+            value: 0,
+            min: 0,
+            max: 4095,
+            title: "LDR Sensor 1 - Light 0"
+        });
+
+        var gauge2 = new JustGage({
+            id: "gauge2",
+            value: 0,
+            min: 0,
+            max: 4095,
+            title: "LDR Sensor 1 - Light 1"
+        });
+
+        var gauge3 = new JustGage({
+            id: "gauge3",
+            value: 0,
+            min: 0,
+            max: 4095,
+            title: "LDR Sensor 1 - Light 2"
+        });
+
+        var gauge4 = new JustGage({
+            id: "gauge4",
+            value: 0,
+            min: 0,
+            max: 4095,
+            title: "LDR Sensor 2 - Light 0"
+        });
+
+        var gauge5 = new JustGage({
+            id: "gauge5",
+            value: 0,
+            min: 0,
+            max: 4095,
+            title: "LDR Sensor 2 - Light 1"
+        });
+
+        var gauge6 = new JustGage({
+            id: "gauge6",
+            value: 0,
+            min: 0,
+            max: 4095,
+            title: "LDR Sensor 2 - Light 2"
+        });
+
+        // Initialize the gauges for the IR sensors
+        var gauge7 = new JustGage({
+            id: "gauge7",
+            value: 0,
+            min: 0,
+            max: 1,
+            title: "IR Sensor 1"
+        });
+
+        var gauge8 = new JustGage({
+            id: "gauge8",
+            value: 0,
+            min: 0,
+            max: 1,
+            title: "IR Sensor 2"
+        });
+
+        // Initialize the gauges for the current and rain sensors
+        var gauge9 = new JustGage({
+            id: "gauge9",
+            value: 0,
+            min: 0,
+            max: 100,
+            title: "Current Sensor"
+        });
+
+        var gauge10 = new JustGage({
+            id: "gauge10",
+            value: 0,
+            min: 0,
+            max: 1,
+            title: "Rain Detector"
+        });
+
+        // Function to update the gauge values
+        function updateGauge(gauge, value) {
+            gauge.refresh(value);
+        }
+    </script>
+
+</body>
+
+</html>

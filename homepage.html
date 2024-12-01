@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Smart Street Lighting Solutions</title>
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBWxLRFas0jtZi2tdWrM0qjIkZhJh2fN8",
+            authDomain: "happyiot.firebaseapp.com",
+            databaseURL: "https://happyiot.firebaseio.com",
+            projectId: "happyiot",
+            storageBucket: "happyiot.appspot.com",
+            messagingSenderId: "900187970996",
+            appId: "1:900187970996:web:2a3a5428c37884b1d3a6e1",
+            measurementId: "G-F611G98B2Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+    </script>
+    <style>
+        /* Reset and full-screen background */
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            height: 100vh;
+            background: url('street.jpg') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            filter: brightness(80%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            color: white;
+        }
+
+        .nav-bar {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .nav-bar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+            transition: color 0.3s;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .nav-bar a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Card Container */
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 40px 20px;
+            background: #f9f9f9;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            width: 300px;
+            margin: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            overflow: hidden;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .card:hover img {
+            transform: scale(1.1);
+        }
+
+        .card h1 {
+            font-size: 24px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .card p {
+            padding: 0 15px 15px;
+            text-align: center;
+        }
+
+        .contact-btn {
+            display: inline-block;
+            background-color: #ff0000;
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .contact-btn:hover {
+            background-color: #cc0000;
+            transform: scale(1.05);
+        }
+
+        /* Footer styles */
+        footer {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* Media queries for responsiveness */
+        @media (max-width: 600px) {
+            .card-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+       
+        h1 {
+            text-align: center;
+        }
+        #messageContainer {
+            max-width: 600px;
+            margin: auto;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #messages {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 200px;
+            overflow-y: scroll;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="homepage.html">HOME</a>
+        <a href="userdashboard.html">DASH BOARD</a>
+        <a href="admin.html">ADMIN</a>
+        <a href="lineman.html">LINEMAN</a>
+        <a href="contactus.html">CONTACT US</a>
+    </div>
+
+    <div class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>Welcome to Smart Street Lighting Solutions</h1>
+        </div>
+    </div>
+
+    <div class="card-container">
+        <div class="card">
+            <img src="smartsensors.jpg" alt="Smart Sensors">
+            <h1>Smart Sensors Integration</h1>
+            <p>Utilize advanced sensors to detect ambient light levels and automatically adjust brightness for optimal visibility and energy savings.</p>
+        </div>
+        <div class="card">
+            <img src="energysaving.jpg" alt="Energy Efficiency">
+            <h1>Energy Efficiency</h1>
+            <p>Our lighting systems reduce energy consumption by up to 50% through smart scheduling and remote monitoring.</p>
+        </div>
+        <div class="card">
+            <img src="remotemonitoring.png" alt="Remote Monitoring">
+            <h1>Remote Monitoring & Maintenance</h1>
+            <p>Get real-time updates on system performance and quickly identify maintenance needs through our user-friendly dashboard.</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Smart Street Lighting Solutions. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

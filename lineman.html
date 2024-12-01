@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register & Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<style>
+html, body {
+    height: 100%; /* Ensures the body fills the entire viewport */
+    margin: 0;
+    padding: 0;
+    position: relative;
+    overflow: hidden; /* Prevents scrollbars due to pseudo-element */
+    font-family: Arial, sans-serif;
+}
+
+/* Background image with brightness filter */
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('street.jpg') no-repeat center center fixed;
+    background-size: cover;
+    filter: brightness(80%); /* Adjust this value for brightness */
+    z-index: -1; /* Ensure it stays behind other content */
+}
+
+/* Navigation bar at the top */
+.nav-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 20px 0;
+    z-index: 2;
+}
+
+.nav-bar a {
+    font-family: Cinzel, serif;
+    color: #0b0404;
+    text-decoration: none;
+    margin: 0 20px;
+    font-size: 20px;
+    font-weight: bold; /* Make the navigation bar text bold */
+}
+
+.nav-bar a:hover {
+    color: #ff0000;
+}
+
+/* Wrapper for the contact information */
+.contact-wrapper {
+    background-color: rgba(255, 255, 255, 0.8); /* Transparent white box */
+    padding: 30px;
+    border-radius: 10px;
+    width: 40%; /* Width of the contact box */
+    margin: 0 auto; /* Centers the wrapper horizontally */
+    text-align: center;
+    position: center;
+    top: 50%;
+    transform: translateY(-40%); /* Centers the wrapper vertically */
+}
+
+/* Styling the Contact Us header */
+h1 {
+    font-size: 36px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Styling the paragraph (contact information) */
+p {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/* Styling the email and phone to stand out */
+.contact-info {
+    font-size: 20px;
+    color: #000;
+    font-weight: bold;
+}
+
+/* Button styles */
+.contact-btn {
+    display: inline-block;
+    background-color: #ff0000;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.contact-btn:hover {
+    background-color: #cc0000;
+}
+</style>
+</head>
+<body>
+<!-- Navigation Bar -->
+<div class="nav-bar">
+<a href="homepage.html">HOME</a>
+<a href="userdashboard.html">DASH BOARD</a>
+<a href="admin.html">ADMIN</a>
+<a href="lineman.html">LINEMAN</a>
+<a href="contactus.html">CONTACT US</a>
+</div>
+
+
+<body>
+    <!-- Registration Form -->
+    <div class="container" id="signup" style="display:none;">
+      <h1 class="form-title">Register</h1>
+      <form method="post" action="">
+        <div id="signUpMessage" class="messageDiv" style="display:none;"></div>
+        <div class="input-group">
+           <i class="fas fa-user"></i>
+           <input type="text" id="fName" placeholder="First Name" required>
+           <label for="fName">First Name</label>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" id="lName" placeholder="Last Name" required>
+            <label for="lName">Last Name</label>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="rEmail" placeholder="Email" required>
+            <label for="rEmail">Email</label>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="rPassword" placeholder="Password" required>
+            <label for="rPassword">Password</label>
+        </div>
+        <button type="button" class="btn" id="submitSignUp">Sign Up</button>
+      </form>
+      <p class="or">----------or--------</p>
+      <div class="icons">
+        <i class="fab fa-google"></i>
+        <i class="fab fa-facebook"></i>
+      </div>
+      <div class="links">
+        <p>Already Have Account?</p>
+        <button id="signInButton">Sign In</button>
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="container" id="signIn">
+        <h1 class="form-title">Sign In For LINEMAN</h1>
+        <form method="post" action="">
+          <div id="signInMessage" class="messageDiv" style="display:none;"></div>
+          <div class="input-group">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="sEmail" placeholder="Email" required>
+              <label for="sEmail">Email</label>
+          </div>
+          <div class="input-group">
+              <i class="fas fa-lock"></i>
+            <input type="password" id="sPassword" placeholder="Password" required>
+              <label for="sPassword">Password</label>
+          </div>
+          <p class="recover">
+            <a href="#">Recover Password</a>
+          </p>
+         <button type="button" class="btn" id="submitSignIn">Sign In</button>
+        </form>
+        <p class="or">----------or--------</p>
+        <div class="icons">
+          <i class="fab fa-google"></i>
+          <i class="fab fa-facebook"></i>
+        </div>
+        <div class="links">
+          <p>Don't have an account yet?</p>
+          <button id="signUpButton">Sign Up</button>
+        </div>
+    </div>
+
+    <script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB2aiPAIgdBBFbCbbtu5iI9Aimx3Lx8b4Y",
+    authDomain: "loginlineman-42190.firebaseapp.com",
+    projectId: "loginlineman-42190",
+    storageBucket: "loginlineman-42190.appspot.com",
+    messagingSenderId: "624654001480",
+    appId: "1:624654001480:web:c94f9ba6cd36bce5e3bf7d"
+  };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    function showMessage(message, divId) {
+      const messageDiv = document.getElementById(divId);
+      messageDiv.style.display = "block";
+      messageDiv.innerHTML = message;
+      setTimeout(() => messageDiv.style.display = "none", 5000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const signUp = document.getElementById('submitSignUp');
+      const signUpButton = document.getElementById('signUpButton');
+      const signInButton = document.getElementById('signInButton');
+      const signIn = document.getElementById('submitSignIn');
+
+      // Sign Up Event
+      signUp.addEventListener('click', (event) => {
+        event.preventDefault();
+        const email = document.getElementById('rEmail').value;
+        const password = document.getElementById('rPassword').value;
+        const firstName = document.getElementById('fName').value;
+        const lastName = document.getElementById('lName').value;
+
+        createUserWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            const user = userCredential.user;
+            setDoc(doc(db, "users", user.uid), {
+              email: email,
+              firstName: firstName,
+              lastName: lastName
+            });
+            showMessage('Account created successfully', 'signUpMessage');
+            window.location.href = 'linemandashboard.html'; // Redirect to webapp.html after sign up
+          })
+          .catch((error) => {
+            showMessage(`Error: ${error.message}`, 'signUpMessage');
+          });
+      });
+
+      // Sign In Event
+      signIn.addEventListener('click', (event) => {
+        event.preventDefault();
+        const email = document.getElementById('sEmail').value;
+        const password = document.getElementById('sPassword').value;
+
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            window.location.href = 'linemandashboard.html'; // Redirect to webapp.html after sign in
+          })
+          .catch((error) => {
+            showMessage(`Error: ${error.message}`, 'signInMessage');
+          });
+      });
+
+      // Toggle between Sign Up and Sign In forms
+      signUpButton.addEventListener('click', () => {
+        document.getElementById('signup').style.display = 'block';
+        document.getElementById('signIn').style.display = 'none';
+      });
+
+      signInButton.addEventListener('click', () => {
+        document.getElementById('signup').style.display = 'none';
+        document.getElementById('signIn').style.display = 'block';
+      });
+    });
+    </script>
+</body>
+</html>

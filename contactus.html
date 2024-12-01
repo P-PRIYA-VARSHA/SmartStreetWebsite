@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <style>
+        /* Full-screen background */
+        html, body {
+            height: 100%; /* Ensures the body fills the entire viewport */
+            margin: 0;
+            padding: 0;
+            position: relative;
+            overflow: hidden; /* Prevents scrollbars due to pseudo-element */
+            font-family: Arial, sans-serif;
+        }
+
+        /* Background image with brightness filter */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('street.jpg') no-repeat center center fixed;
+            background-size: cover;
+            filter: brightness(80%); /* Adjust this value for brightness */
+            z-index: -1; /* Ensure it stays behind other content */
+        }
+
+        /* Navigation bar at the top */
+        .nav-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+            z-index: 2;
+        }
+
+        .nav-bar a {
+            font-family: Cinzel, serif;
+            color: #0b0404;
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 20px;
+            font-weight: bold; /* Make the navigation bar text bold */
+        }
+
+        .nav-bar a:hover {
+            color: #ff0000;
+        }
+
+        /* Wrapper for the contact information */
+        .contact-wrapper {
+            background-color: rgba(255, 255, 255, 0.8); /* Transparent white box */
+            padding: 30px;
+            border-radius: 10px;
+            width: 40%; /* Width of the contact box */
+            margin: 0 auto; /* Centers the wrapper horizontally */
+            text-align: center;
+            position: relative;
+            top: 50%;
+            transform: translateY(-40%); /* Centers the wrapper vertically */
+        }
+
+        /* Styling the Contact Us header */
+        h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Styling the paragraph (contact information) */
+        p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        /* Styling the email and phone to stand out */
+        .contact-info {
+            font-size: 20px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* Button styles */
+        .contact-btn {
+            display: inline-block;
+            background-color: #ff0000;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .contact-btn:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation bar at the top -->
+    <div class="nav-bar">
+        <a href="homepage.html">HOME</a>
+        <a href="userdashboard.html">DASH BOARD</a>
+        <a href="admin.html">ADMIN</a>
+        <a href="lineman.html">LINEMAN</a>
+        <a href="contactus.html">CONTACT US</a>
+    </div>
+
+    <!-- Center the text wrapper vertically and horizontally -->
+    <div class="contact-wrapper">
+        <h1>Contact Us</h1>
+        <p>If you have any questions or need more information, feel free to reach out to us. We're here to help and provide support regarding our street lighting solutions.</p>
+        
+        <p class="contact-info">Email: support@smartlights.com</p>
+        <p class="contact-info">Phone: 8008030182</p>
+        <p class="contact-info">Address: Vel Tech university,avadi,chennai,60062</p>
+
+        <a href="mailto:support@smartlights.com" class="contact-btn">Email Us</a>
+    </div>
+
+</body>
+</html>

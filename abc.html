@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Integration</title>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+    <h1>MQTT Integration Example</h1>
+
+    <button id="publishBtn">Publish Message</button>
+    <div id="messages"></div>
+
+    <script>
+        // Connect to the MQTT broker
+        const client = mqtt.connect('wss://broker.hivemq.com:8000/mqtt');
+
+        // Handle connection
+        client.on('connect', () => {
+            console.log('Connected to MQTT broker');
+            // Subscribe to a topic
+            client.subscribe('your/topic', (err) => {
+                if (!err) {
+                    console.log('Subscribed to topic');
+                }
+            });
+        });
+
+        // Handle incoming messages
+        client.on('message', (topic, message) => {
+            // message is a Buffer
+            const msg = message.toString();
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += `<p>Received: ${msg}</p>`;
+        });
+
+        // Publish a message when the button is clicked
+        document.getElementById('publishBtn').addEventListener('click', () => {
+            const message = 'Hello MQTT!';
+            client.publish('your/topic', message, { qos: 0, retain: false }, (err) => {
+                if (!err) {
+                    console.log('Message published:', message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

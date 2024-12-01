@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fault Prediction with Lineman Feedback</title>
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background: url('street.jpg') no-repeat center center fixed;
+            background-size: cover;
+            filter: brightness(50%);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.0);
+            padding: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+        }
+
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #000;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #3498db;
+        }
+
+        body {
+            padding-top: 60px;
+        }
+
+        #alerts {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .alert {
+            background-color: #ffdddd;
+            color: #d8000c;
+            border-left: 6px solid #f44336;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert p {
+            margin: 0;
+            padding-right: 80px;
+        }
+
+        .alert button {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .alert button:hover {
+            background-color: #e74c3c;
+        }
+
+        #linemanForm {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #linemanForm h3 {
+            margin-top: 0;
+            color: #34495e;
+        }
+
+        #linemanForm label {
+            font-weight: 500;
+            margin-top: 10px;
+            display: block;
+            color: #34495e;
+        }
+
+        #linemanForm textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        #linemanForm button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #linemanForm button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+        import { getDatabase, ref, onValue, set, push } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBWxLRFas0jtZi2tdWrM0qjIkZhJh2fN8",
+            authDomain: "happyiot.firebaseapp.com",
+            databaseURL: "https://happyiot.firebaseio.com",
+            projectId: "happyiot",
+            storageBucket: "happyiot.appspot.com",
+            messagingSenderId: "900187970996",
+            appId: "1:900187970996:web:2a3a5428c37884b1d3a6e1",
+            measurementId: "G-F611G98B2Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Define thresholds
+        const thresholds = {
+            faultCurrentSensor: 0,
+            voltage: 10,
+            ldr1Value0: 100,
+            rainDetected: 1
+        };
+
+        // Function to fetch data from Firebase
+        function fetchData() {
+            const faultRef = ref(db);
+            onValue(faultRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const faultData = snapshot.val();
+                    console.log('Fetched Fault Data:', faultData);
+                    checkForFaults(faultData); // Check data and trigger alerts
+                } else {
+                    console.log('No fault data available');
+                }
+            }, (error) => {
+                console.error('Error fetching fault data:', error);
+            });
+        }
+
+        // Function to check sensor values
+        function checkForFaults(data) {
+            const alertsDiv = document.getElementById('alerts');
+            const alertsStored = JSON.parse(localStorage.getItem('alerts')) || [];
+
+            let faultDetected = false;
+            for (const [key, value] of Object.entries(data)) {
+                console.log(`Checking ${key} with value: ${value}`);
+
+                if (key === 'faultCurrentSensor' && value > thresholds.faultCurrentSensor) {
+                    const alertMessage = `Power leakage detected! Current: ${value}`;
+                    faultDetected = true;
+                    addAlert(alertMessage, key, alertsStored);
+                } else if (key === 'voltage' && value < thresholds.voltage) {
+                    const alertMessage = `Voltage breakage detected! Voltage: ${value}`;
+                    faultDetected = true;
+                    addAlert(alertMessage, key, alertsStored);
+                } else if (key === 'ldr1Value0' && value < thresholds.ldr1Value0) {
+                    const alertMessage = `Fault light detected on LDR1! Value: ${value}`;
+                    faultDetected = true;
+                    addAlert(alertMessage, key, alertsStored);
+                } else if (key === 'rainDetected' && value === thresholds.rainDetected) {
+                    const alertMessage = `Rain detected! Value: ${value}`;
+                    faultDetected = true;
+                    addAlert(alertMessage, key, alertsStored);
+                }
+            }
+
+            // Update local storage and UI
+            if (faultDetected) {
+                localStorage.setItem('alerts', JSON.stringify(alertsStored));
+                renderAlerts(alertsStored);
+            }
+        }
+
+        // Function to add alert to local storage
+        function addAlert(message, key, alertsStored) {
+            const alertId = `alert-${key}-${Date.now()}`;
+            alertsStored.push({ id: alertId, message: message });
+        }
+
+        // Function to render alerts
+        function renderAlerts(alerts) {
+            const alertsDiv = document.getElementById('alerts');
+            alertsDiv.innerHTML = ''; // Clear previous alerts
+
+            alerts.forEach(alert => {
+                const alertHTML = `
+                    <div class="alert" id="${alert.id}">
+                        <p>${alert.message}</p>
+                        <button class="rectify-button" data-id="${alert.id}">Fault Rectified</button>
+                    </div>
+                `;
+                alertsDiv.innerHTML += alertHTML;
+            });
+        }
+
+        // Attach event listener to the parent element (alerts div) for any button clicks
+        document.getElementById('alerts').addEventListener('click', function(event) {
+            if (event.target && event.target.classList.contains('rectify-button')) {
+                const alertId = event.target.getAttribute('data-id');
+                rectifyFault(alertId);
+            }
+        });
+
+        // Function to rectify fault
+        function rectifyFault(alertId) {
+            const alertsStored = JSON.parse(localStorage.getItem('alerts')) || [];
+            const updatedAlerts = alertsStored.filter(alert => alert.id !== alertId);
+            localStorage.setItem('alerts', JSON.stringify(updatedAlerts));
+            renderAlerts(updatedAlerts);
+        }
+
+        // Function to show lineman input form
+        function showLinemanInputForm() {
+            const formDiv = document.getElementById('linemanForm');
+            formDiv.innerHTML = `
+                <h3>Lineman Feedback</h3>
+                <label for="faultReason">Reason for Fault:</label>
+                <textarea id="faultReason" rows="4" placeholder="Describe the reason for the fault..."></textarea>
+                
+                <label for="precaution">Future Precaution:</label>
+                <textarea id="precaution" rows="4" placeholder="Describe future precaution..."></textarea>
+                
+                <button onclick="submitLinemanFeedback()">Submit Feedback</button>
+            `;
+        }
+
+        // Function to submit lineman feedback
+        function submitLinemanFeedback() {
+            const reason = document.getElementById('faultReason').value;
+            const precaution = document.getElementById('precaution').value;
+
+            if (reason && precaution) {
+                const feedbackRef = push(ref(db, 'linemanFeedback'));
+                set(feedbackRef, {
+                    faultReason: reason,
+                    precaution: precaution
+                }).then(() => {
+                    alert('Lineman feedback submitted successfully');
+                    document.getElementById('linemanForm').innerHTML = '';
+                }).catch((error) => {
+                    console.error('Error submitting feedback:', error);
+                    alert('Error submitting feedback: ' + error.message);
+                });
+            } else {
+                alert('Please fill in all fields.');
+            }
+        }
+
+        // Call the fetchData function once the page loads
+        window.onload = () => {
+            fetchData();
+            const alertsStored = JSON.parse(localStorage.getItem('alerts')) || [];
+            renderAlerts(alertsStored); // Render alerts from local storage on load
+        };
+    </script>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="homepage.html">HOME</a></li>
+            <li><a href="userdashboard.html">DASHBOARD</a></li>
+            <li><a href="admin.html">ADMIN</a></li>
+            <li><a href="lineman.html">LINEMAN</a></li>
+            <li><a href="contactus.html">CONTACTUS</a></li>
+        </ul>
+    </nav>
+
+    <h1>Fault Prediction with Lineman Feedback</h1>
+
+    <div id="alerts"></div>
+
+    <div id="linemanForm"></div>
+
+</body>
+</html>
